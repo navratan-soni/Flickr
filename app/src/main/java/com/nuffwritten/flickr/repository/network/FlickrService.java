@@ -34,24 +34,21 @@ public class FlickrService {
 
     private OkHttpClient getOkHttpClient() {
         return new OkHttpClient.Builder()
-                .addInterceptor(new Interceptor() {
-                    @Override
-                    public Response intercept(Chain chain) throws IOException {
-                        Request original = chain.request();
-                        HttpUrl originalHttpUrl = original.url();
+                .addInterceptor(chain -> {
+                    Request original = chain.request();
+                    HttpUrl originalHttpUrl = original.url();
 
-                        HttpUrl url = originalHttpUrl.newBuilder()
-                                .addQueryParameter("api_key", API_KEY)
-                                .addQueryParameter("format", "json")
-                                .addQueryParameter("nojsoncallback", "1")
-                                .build();
+                    HttpUrl url = originalHttpUrl.newBuilder()
+                            .addQueryParameter("api_key", API_KEY)
+                            .addQueryParameter("format", "json")
+                            .addQueryParameter("nojsoncallback", "1")
+                            .build();
 
-                        Request.Builder requestBuilder = original.newBuilder()
-                                .url(url);
+                    Request.Builder requestBuilder = original.newBuilder()
+                            .url(url);
 
-                        Request request = requestBuilder.build();
-                        return chain.proceed(request);
-                    }
+                    Request request = requestBuilder.build();
+                    return chain.proceed(request);
                 })
                 .build();
     }
