@@ -10,7 +10,7 @@
     tools:context=".ui.SearchResultFragment">
 
     <android.support.v7.widget.SearchView
-        android:id="@+id/search"
+        android:id="@+id/searchView"
         app:queryHint="Search Photos"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

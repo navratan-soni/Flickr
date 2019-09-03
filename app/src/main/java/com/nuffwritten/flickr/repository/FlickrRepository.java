@@ -2,7 +2,9 @@ package com.nuffwritten.flickr.repository;
 
 import android.arch.lifecycle.MutableLiveData;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
+import com.nuffwritten.flickr.model.AdapterItemsModel;
 import com.nuffwritten.flickr.model.PhotoModel;
 import com.nuffwritten.flickr.model.SearchResultModel;
 import com.nuffwritten.flickr.repository.network.FlickrApi;
@@ -21,10 +23,8 @@ import retrofit2.Response;
 public class FlickrRepository {
 
     private static final int PAGE_LIMIT = 20;
-
     private static volatile FlickrRepository mInstance;
-
-    FlickrApi flickrApi;
+    private FlickrApi flickrApi;
 
     private FlickrRepository() {
         flickrApi = new FlickrService().getFlickrApi();
@@ -41,20 +41,27 @@ public class FlickrRepository {
         return mInstance;
     }
 
-    public void fetchPhotos(int pageNumebr, String searchTag, final MutableLiveData<List<String>> liveData) {
+    public void fetchPhotos(int pageNumebr, String searchTag, final MutableLiveData<AdapterItemsModel> liveData) {
         Call<SearchResultModel> call =
                  flickrApi.getPhotosFromTag(PAGE_LIMIT, pageNumebr, searchTag);
 
         call.enqueue(new Callback<SearchResultModel>() {
+
             @Override
             public void onResponse(Call<SearchResultModel> call, Response<SearchResultModel> response) {
                  if(response.isSuccessful()) {
-                     liveData.setValue(getMappedList(response.body()));
+                     SearchResultModel resultModel = response.body();
+                     AdapterItemsModel model =
+                             new AdapterItemsModel(resultModel.getPhotos().getPages(),
+                                     resultModel.getPhotos().getPage(),
+                                     getMappedList(resultModel));
+                     liveData.setValue(model);
                  }
             }
+
             @Override
             public void onFailure(Call<SearchResultModel> call, Throwable t) {
-                     liveData.setValue(null);
+                liveData.setValue(null);
             }
         });
     }

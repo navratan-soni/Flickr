@@ -3,7 +3,9 @@ package com.nuffwritten.flickr.viewmodel;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 import android.text.TextUtils;
+import android.util.Log;
 
+import com.nuffwritten.flickr.model.AdapterItemsModel;
 import com.nuffwritten.flickr.repository.FlickrRepository;
 
 import java.util.List;
@@ -14,10 +16,10 @@ import java.util.List;
 
 public class SearchResultViewModel extends ViewModel {
 
-    private int pageNumber = 0;
+    private int pageNumber = 1;
     private FlickrRepository repository;
     private String previousSearchedString = "";
-    private MutableLiveData<List<String>> liveData;
+    private MutableLiveData<AdapterItemsModel> liveData;
 
     public SearchResultViewModel() {
         repository = FlickrRepository.getInstance();
@@ -25,14 +27,13 @@ public class SearchResultViewModel extends ViewModel {
     }
 
     public void fetch(String currentSearchString) {
-
         if(TextUtils.isEmpty(currentSearchString))
             return;
 
         if(previousSearchedString.equals(currentSearchString)) {
             pageNumber++;
         } else {
-            pageNumber = 0;
+            pageNumber = 1;
             previousSearchedString = currentSearchString;
         }
         repository.fetchPhotos(pageNumber, currentSearchString, liveData);
@@ -42,7 +43,7 @@ public class SearchResultViewModel extends ViewModel {
         fetch(previousSearchedString);
     }
 
-    public MutableLiveData<List<String>> getLiveData() {
+    public MutableLiveData<AdapterItemsModel> getLiveData() {
         return liveData;
     }
 

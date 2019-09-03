@@ -8,6 +8,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +17,9 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.nuffwritten.flickr.R;
+import com.nuffwritten.flickr.model.AdapterItemsModel;
 import com.nuffwritten.flickr.ui.util.SpacingItemDecoration;
+import com.nuffwritten.flickr.util.DebounceQueryListener;
 import com.nuffwritten.flickr.viewmodel.SearchResultViewModel;
 
 import java.util.ArrayList;
@@ -34,6 +38,7 @@ public class SearchResultFragment extends Fragment {
     private static final int DEFAULT_GRID_ELEMENTS = 2;
     private Button mBtnLoadMore;
     private TextView mNoItemsMsg;
+    private SearchView searchView;
 
     public static SearchResultFragment newInstance() {
         return new SearchResultFragment();
@@ -55,34 +60,22 @@ public class SearchResultFragment extends Fragment {
         resultList = new ArrayList<>();
         mAdapter = new SearchResultAdapter(getActivity(), resultList);
         mBtnLoadMore = view.findViewById(R.id.loadMoreBtn);
-        mBtnLoadMore.setOnClickListener(getClickListener());
+        mBtnLoadMore.setOnClickListener(v -> fetchMoreData());
         mNoItemsMsg = view.findViewById(R.id.message);
+        searchView = view.findViewById(R.id.searchView);
+        searchView.setOnQueryTextListener(getQuesryListener());
         resetAdapter(DEFAULT_GRID_ELEMENTS);
-    }
-
-    private View.OnClickListener getClickListener() {
-        return new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mViewModel.fetchMore();
-            }
-        };
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         mViewModel = ViewModelProviders.of(this).get(SearchResultViewModel.class);
-        mViewModel.getLiveData().observe(getViewLifecycleOwner(), new Observer<List<String>>() {
-            @Override
-            public void onChanged(@Nullable List<String> list) {
-                updateUi(list);
-            }
-        });
-
+        mViewModel.getLiveData().observe(getViewLifecycleOwner(), itemsModel -> updateUi(itemsModel));
     }
 
-    public void updateUi(List<String> items) {
+    public void updateUi(AdapterItemsModel itemsModel) {
+        List<String> items = itemsModel.getImageUrls();
         if (items == null || items.size() == 0) {
             resultList.clear();
             mAdapter.notifyDataSetChanged();
@@ -90,13 +83,37 @@ public class SearchResultFragment extends Fragment {
             resultList.addAll(items);
             mAdapter.notifyItemRangeInserted(mAdapter.getItemCount(), items.size());
         }
-        mBtnLoadMore.setVisibility(mAdapter.getItemCount() > 0 ? View.VISIBLE : View.GONE);
-        mNoItemsMsg.setVisibility(mAdapter.getItemCount() > 0 ? View.GONE : View.VISIBLE);
+        if(mAdapter.getItemCount() > 0) {
+            mNoItemsMsg.setVisibility(View.GONE);
+            mBtnLoadMore.setVisibility(itemsModel.getCurrentPage() < itemsModel.getPages() ? View.VISIBLE : View.GONE);
+        } else {
+            mNoItemsMsg.setVisibility(View.VISIBLE);
+            mBtnLoadMore.setVisibility(View.GONE);
+        }
     }
 
     public void resetAdapter(int numOfItems) {
         GridLayoutManager manager = new GridLayoutManager(getActivity(), numOfItems);
         mRecyclerView.setLayoutManager(manager);
         mRecyclerView.setAdapter(mAdapter);
+    }
+
+    public DebounceQueryListener getQuesryListener() {
+        return new DebounceQueryListener() {
+            @Override
+            public void onQueryTextChanged(String searchText) {
+                fetchData(searchText);
+            }
+        };
+    }
+
+    public void fetchData(String searchText) {
+        mBtnLoadMore.setVisibility(View.GONE);
+        mViewModel.fetch(searchText);
+    }
+
+    public void fetchMoreData() {
+        mBtnLoadMore.setVisibility(View.GONE);
+        mViewModel.fetchMore();
     }
 }
