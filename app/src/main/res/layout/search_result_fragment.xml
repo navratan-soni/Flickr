@@ -9,12 +9,30 @@
     android:focusableInTouchMode="true"
     tools:context=".ui.SearchResultFragment">
 
-    <android.support.v7.widget.SearchView
-        android:id="@+id/searchView"
-        app:queryHint="Search Photos"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:iconifiedByDefault="false" />
+        android:orientation="horizontal">
+        <android.support.v7.widget.SearchView
+            android:id="@+id/searchView"
+            app:queryHint="Search Photos"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            app:iconifiedByDefault="false" />
+
+        <TextView
+            android:id="@+id/current_column"
+            android:layout_width="wrap_content"
+            android:paddingRight="16dp"
+            android:paddingLeft="16dp"
+            android:textSize="18dp"
+            android:textColor="@android:color/black"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_height="match_parent" />
+
+    </LinearLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -32,10 +50,19 @@
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
+
+        <ProgressBar
+            android:id="@+id/progress_circular"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="?android:attr/progressBarStyleLarge"
+            android:visibility="gone"
+            android:layout_centerInParent="true"/>
     </RelativeLayout>
 
     <Button
         android:id="@+id/loadMoreBtn"
+        style="@style/Widget.AppCompat.Button.Colored"
         android:text="Load more"
         android:visibility="gone"
         android:layout_width="match_parent"

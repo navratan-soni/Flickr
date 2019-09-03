@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Flickr</string>
+    <string name="dialog_title">Enter Number of Grids</string>
+    <string name="extract_notice">Enter number netween 1 and 5</string>
 </resources>

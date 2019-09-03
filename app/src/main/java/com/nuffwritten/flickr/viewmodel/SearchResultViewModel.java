@@ -27,8 +27,6 @@ public class SearchResultViewModel extends ViewModel {
     }
 
     public void fetch(String currentSearchString) {
-        if(TextUtils.isEmpty(currentSearchString))
-            return;
 
         if(previousSearchedString.equals(currentSearchString)) {
             pageNumber++;
