@@ -62,7 +62,7 @@ public class SearchResultFragment extends Fragment implements NumberChangedListe
 
     private void initView(View view) {
         mRecyclerView = view.findViewById(R.id.recyclerView);
-        SpacingItemDecoration decoration = new SpacingItemDecoration(5, SpacingItemDecoration.GRID);
+        SpacingItemDecoration decoration = new SpacingItemDecoration(10, SpacingItemDecoration.GRID);
         mRecyclerView.addItemDecoration(decoration);
         resultList = new ArrayList<>();
         mAdapter = new SearchResultAdapter(getActivity(), resultList);
